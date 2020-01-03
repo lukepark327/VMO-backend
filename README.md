@@ -22,6 +22,15 @@ For example, let us get blocks whose category is "people":
 curl http://127.0.0.1:3001/category/people
 ```
 
+<!--
+## Live Demo
+
+[![Run on Ainize](https://ainize.ai/static/images/run_on_ainize_button.svg)](https://ainize.web.app/redirect?git_repo=github.com/lukepark327/VMO-backend)
+
+There is an [endpoint](https://endpoint.ainize.ai/lukepark327/vmo-backend/) provided by Ainize, a serverless platform for open-source projects.
+For example, you can see all blocks in blockchain with a `/blocks` GET request (i.e. [HERE](https://endpoint.ainize.ai/lukepark327/vmo-backend/blocks)) .
+-->
+
 ---
 
 [[:us: | English | 영어]](https://github.com/lukepark327/onechain)
