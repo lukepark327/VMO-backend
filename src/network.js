@@ -1,7 +1,8 @@
 "use strict";
-const WebSocket = require("ws");
+import { Blockchain } from "./modules"; // types
+import { getLatestBlock, addBlock, replaceChain, getBlockchain } from "./modules"; // blockchain
 
-const bc = require("./blockchain");
+import WebSocket, { Server } from "ws";
 
 const p2p_port = process.env.P2P_PORT || 6001;
 
@@ -11,12 +12,48 @@ const MessageType = {
     RESPONSE_BLOCKCHAIN: 2
 };
 
+function queryAllMsg() {
+    return ({
+        "type": MessageType.QUERY_ALL,
+        "data": null
+    });
+}
+
+function queryChainLengthMsg() {
+    return ({
+        "type": MessageType.QUERY_LATEST,
+        "data": null
+    });
+}
+
+function responseChainMsg() {
+    return ({
+        "type": MessageType.RESPONSE_BLOCKCHAIN,
+        "data": getBlockchain().encode()
+    });
+}
+
+function responseLatestMsg() {
+    return ({
+        "type": MessageType.RESPONSE_BLOCKCHAIN,
+        "data": new Blockchain([getLatestBlock()]).encode()
+    });
+}
+
 var sockets = [];
+
+function write(ws, message) { ws.send(JSON.stringify(message)); }
+
+function broadcast(message) {
+    sockets.forEach(function (socket) {
+        write(socket, message);
+    });
+}
 
 function getSockets() { return sockets; }
 
 function initP2PServer() {
-    const server = new WebSocket.Server({ port: p2p_port });
+    const server = new Server({ port: p2p_port });
     server.on("connection", function (ws) { initConnection(ws); });
     console.log("Listening websocket p2p port on: " + p2p_port);
 }
@@ -68,9 +105,9 @@ function connectToPeers(newPeers) {
 }
 
 function handleBlockchainResponse(message) {
-    const receivedBlocks = JSON.parse(message.data);
-    const latestBlockReceived = receivedBlocks[receivedBlocks.length - 1];
-    const latestBlockHeld = bc.getLatestBlock();
+    const receivedBlockchain = new Blockchain().decode(message.data);
+    const latestBlockReceived = receivedBlockchain.latestBlock();
+    const latestBlockHeld = getLatestBlock();
 
     if (latestBlockReceived.header.index > latestBlockHeld.header.index) {
         console.log(
@@ -78,14 +115,14 @@ function handleBlockchainResponse(message) {
             + " We got: " + latestBlockHeld.header.index + ", "
             + " Peer got: " + latestBlockReceived.header.index
         );
-        if (bc.calculateHashForBlock(latestBlockHeld) === latestBlockReceived.header.previousHash) {
+        if (latestBlockHeld.hash() === latestBlockReceived.header.previousHash) {
             // A received block refers the latest block of my ledger.
             console.log("We can append the received block to our chain");
-            if (bc.addBlock(latestBlockReceived)) {
+            if (addBlock(latestBlockReceived)) {
                 broadcast(responseLatestMsg());
             }
         }
-        else if (receivedBlocks.length === 1) {
+        else if (receivedBlockchain.length === 1) {
             // Need to reorganize.
             console.log("We have to query the chain from our peer");
             broadcast(queryAllMsg());
@@ -93,52 +130,16 @@ function handleBlockchainResponse(message) {
         else {
             // Replace chain.
             console.log("Received blockchain is longer than current blockchain");
-            bc.replaceChain(receivedBlocks);
+            replaceChain(receivedBlockchain);
         }
     }
     else { console.log("Received blockchain is not longer than current blockchain. Do nothing"); }
 }
 
-function queryAllMsg() {
-    return ({
-        "type": MessageType.QUERY_ALL,
-        "data": null
-    });
-}
-
-function queryChainLengthMsg() {
-    return ({
-        "type": MessageType.QUERY_LATEST,
-        "data": null
-    });
-}
-
-function responseChainMsg() {
-    return ({
-        "type": MessageType.RESPONSE_BLOCKCHAIN,
-        "data": JSON.stringify(bc.getBlockchain())
-    });
-}
-
-function responseLatestMsg() {
-    return ({
-        "type": MessageType.RESPONSE_BLOCKCHAIN,
-        "data": JSON.stringify([bc.getLatestBlock()])
-    });
-}
-
-function write(ws, message) { ws.send(JSON.stringify(message)); }
-
-function broadcast(message) {
-    sockets.forEach(function (socket) {
-        write(socket, message);
-    });
-}
-
-module.exports = {
+export default {
+    responseLatestMsg,
+    broadcast,
     connectToPeers,
     getSockets,
-    broadcast,
-    responseLatestMsg,
     initP2PServer
 };

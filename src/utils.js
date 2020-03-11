@@ -1,15 +1,23 @@
 'use strict';
+import { cloneDeep } from "lodash";
+import { existsSync, mkdirSync, readFileSync } from "fs";
 
-function getCurrentTimestamp() {
-    return Math.round(new Date().getTime() / 1000);
+function deepCopy(src) {
+    return cloneDeep(src);
 }
 
-function getCurrentVersion() {
-    const fs = require("fs");
+function deepEqual(value, other) {
+    // return _.isEqual(value, other); // Can not get rid of functions.
+    return JSON.stringify(value) === JSON.stringify(other);
+}
 
-    const packageJson = fs.readFileSync("./package.json");
-    const currentVersion = JSON.parse(packageJson).version;
-    return currentVersion;
+function recursiveMkdir(path) {
+    var pathSplited = path.split('/');
+    var tempPath = '';
+    for (var i = 0; i < pathSplited.length; i++) {
+        tempPath += (pathSplited[i] + '/');
+        if (!existsSync(tempPath)) { mkdirSync(tempPath); }
+    }
 }
 
 function hexToBinary(s) {
@@ -28,8 +36,21 @@ function hexToBinary(s) {
     return ret;
 }
 
-module.exports = {
+function getCurrentTimestamp() {
+    return Math.round(new Date().getTime() / 1000);
+}
+
+function getCurrentVersion() {
+    const packageJson = readFileSync("./package.json");
+    const currentVersion = JSON.parse(packageJson).version;
+    return currentVersion;
+}
+
+export default {
+    deepCopy,
+    deepEqual,
+    recursiveMkdir,
+    hexToBinary,
     getCurrentTimestamp,
-    getCurrentVersion,
-    hexToBinary
+    getCurrentVersion
 };

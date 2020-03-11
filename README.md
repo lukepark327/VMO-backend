@@ -8,8 +8,10 @@ Based on [`onechain`](https://github.com/lukepark327/onechain).
 ### Add new block
 ```bash
 curl -X POST http://127.0.0.1:3001/mineBlock
-curl -H "Content-type:application/json" --data "{\"category\" : \"people\", \"data\" : [\"Anything you want\", \"Anything you need\"]}" http://127.0.0.1:3001/mineBlock
+curl -H "Content-type:application/json" --data "{\"data\" : [\"Category name\", \"Anything you want\", \"Anything you need\"]}" http://127.0.0.1:3001/mineBlock
 ```
+
+The first element of data array must be a category name. "general" is default if an empty array.
 
 ### Get blocks of particular category
 ```bash
@@ -39,7 +41,7 @@ For example, you can see all blocks in blockchain with a `/blocks` GET request (
 ---
 
 [![license](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![version](https://img.shields.io/badge/version-v2.2.2-orange.svg)](https://github.com/lukepark327/onechain/blob/master/package.json)
+[![version](https://img.shields.io/badge/version-v3.0.0-orange.svg)](https://github.com/lukepark327/onechain/blob/master/package.json)
 [![node](https://img.shields.io/badge/node-%3E%3D4.3.2-yellow.svg)](https://nodejs.org/en/)   
 
 # onechain
@@ -58,8 +60,8 @@ Inspired by [lhartikk/naivechain](https://github.com/lhartikk/naivechain).
 
 [![Run on Ainize](https://ainize.ai/static/images/run_on_ainize_button.svg)](https://ainize.web.app/redirect?git_repo=github.com/lukepark327/onechain)
 
-Run onechain on **Ainize**! You can access the *live* onechain with the [endpoint](https://endpoint.ainize.ai/lukepark327/onechain) provided by Ainize, a serverless platform for open-source projects.
-For example, you can see all blocks in blockchain with a `/blocks` GET request (i.e. [HERE](https://endpoint.ainize.ai/lukepark327/onechain/blocks)) .
+Run onechain on **Ainize**! You can access the *live* onechain with the [endpoint](https://onechain.lukepark327.endpoint.ainize.ai) provided by Ainize, a serverless platform for open-source projects.
+For example, you can see all blocks in blockchain with a `/blocks` GET request (i.e. [HERE](https://onechain.lukepark327.endpoint.ainize.ai/blocks)) .
 
 ## onechain-explorer
 
@@ -205,18 +207,7 @@ curl http://127.0.0.1:3001/block/3
 ### Add new block
 ```bash
 curl -X POST http://127.0.0.1:3001/mineBlock
-curl -H "Content-type:application/json" --data "{\"category\" : \"people\", \"data\" : [\"Anything you want\", \"Anything you need\"]}" http://127.0.0.1:3001/mineBlock
-```
-
-### Get blocks of particular category
-```bash
-curl http://127.0.0.1:3001/category/:filter
-```
-
-For example, let us get blocks whose category is "people":
-
-```bash
-curl http://127.0.0.1:3001/category/people
+curl -H "Content-type:application/json" --data "{\"data\" : [\"Anything you want\", \"Anything you need\"]}" http://127.0.0.1:3001/mineBlock
 ```
 
 ### Get current version
